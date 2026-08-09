@@ -1,0 +1,8 @@
+{
+  "name": "Pencatatan Kebersihan Santri",
+  "description": "Aplikasi untuk mencatat poin pelanggaran kebersihan santri, dilengkapi dengan form input dan tabel riwayat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
