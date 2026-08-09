@@ -49,9 +49,24 @@ export default function App() {
     const fetchData = async () => {
       setIsLoadingApi(true);
       try {
-        // Use Mock Data instead of API for review
-        const santriRes = MOCK_SANTRI;
-        const pelanggaranRes = MOCK_PELANGGARAN;
+        const response = await fetch(`${API_URL}?action=getData`);
+        const result = await response.json();
+        
+        const santriRes = result.status === 'success' && result.data.students && result.data.students.length > 0 
+          ? result.data.students 
+          : MOCK_SANTRI;
+          
+        const pelanggaranRes = result.status === 'success' && result.data.rules && result.data.rules.length > 0
+          ? result.data.rules
+          : MOCK_PELANGGARAN;
+
+        const recordsRes = result.status === 'success' && result.data.records && result.data.records.length > 0
+          ? result.data.records
+          : null;
+          
+        if (recordsRes) {
+          setRecords(recordsRes);
+        }
         
         setApiStudents(santriRes);
         
@@ -93,7 +108,31 @@ export default function App() {
         
         setApiPointItems(items);
       } catch (error) {
-        console.error('Error loading mock data:', error);
+        console.error('Error loading API data, falling back to mock:', error);
+        
+        // Fallback to mock data
+        setApiStudents(MOCK_SANTRI);
+        const items: PointItem[] = [];
+        MOCK_PELANGGARAN.forEach((p: any, index: number) => {
+          const vId = `v_${index}`;
+          const tId = `t_${index}`;
+          const codeStr = (index + 1).toString().padStart(2, '0');
+          const vCode = `A${codeStr}`;
+          const tCode = `T${codeStr}`;
+          
+          const taubatName = p['Bentuk Taubat (Hukuman Mendidik)']?.trim() || 'Tidak ada tindakan taubat khusus';
+          const taubatPoints = Math.abs(parseInt(String(p['Pengurangan Poin Taubat'] || 0), 10));
+          
+          if (taubatPoints > 0) {
+            items.push({
+              id: tId, code: tCode, name: taubatName, points: taubatPoints, category: p['Kategori (BAB)'], klasifikasi: p['Klasifikasi'], type: 'Taubat'
+            });
+          }
+          items.push({
+            id: vId, code: vCode, name: p['Larangan / Pelanggaran'], points: parseInt(String(p['Poin Pelanggaran'] || 0), 10), category: p['Kategori (BAB)'], klasifikasi: p['Klasifikasi'], type: 'Violation', defaultTaubatId: taubatPoints > 0 ? tId : undefined
+          });
+        });
+        setApiPointItems(items);
       } finally {
         setIsLoadingApi(false);
       }
