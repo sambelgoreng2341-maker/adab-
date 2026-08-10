@@ -27,6 +27,7 @@ export default function App() {
   // API Data
   const [apiStudents, setApiStudents] = useState<ApiStudent[]>([]);
   const [apiPointItems, setApiPointItems] = useState<PointItem[]>([]);
+  const [apiRawRules, setApiRawRules] = useState<any[]>([]);
   const [isLoadingApi, setIsLoadingApi] = useState(true);
 
   // Initialize Dark Mode
@@ -69,6 +70,7 @@ export default function App() {
         }
         
         setApiStudents(santriRes);
+        setApiRawRules(pelanggaranRes);
         
         const items: PointItem[] = [];
         pelanggaranRes.forEach((p: any, index: number) => {
@@ -112,6 +114,7 @@ export default function App() {
         
         // Fallback to mock data
         setApiStudents(MOCK_SANTRI);
+        setApiRawRules(MOCK_PELANGGARAN);
         const items: PointItem[] = [];
         MOCK_PELANGGARAN.forEach((p: any, index: number) => {
           const vId = `v_${index}`;
@@ -313,7 +316,7 @@ export default function App() {
             <HistoryList records={records} onDeleteRecord={handleDeleteRecord} onCompleteTaubat={handleCompleteTaubat} />
           )}
           {activeTab === 'rules' && (
-            <Rules />
+            <Rules apiPointItems={apiPointItems} rawRules={apiRawRules} />
           )}
         </div>
         </div>

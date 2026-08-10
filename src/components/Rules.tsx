@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
-import { MOCK_PELANGGARAN, POINT_ITEMS, PUNISHMENT_ZONES, getCategoryColor } from '../data';
+import { PUNISHMENT_ZONES, getCategoryColor } from '../data';
+import { PointItem } from '../types';
 import { ShieldAlert, BookOpen, AlertTriangle, AlertCircle, Info, ChevronDown, ChevronUp, Scale } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export const Rules: React.FC = () => {
+interface RulesProps {
+  apiPointItems: PointItem[];
+  rawRules: any[];
+}
+
+export const Rules: React.FC<RulesProps> = ({ apiPointItems, rawRules }) => {
   const [activeTab, setActiveTab] = useState<'points' | 'detailed' | 'zones'>('points');
 
   return (
@@ -68,7 +74,7 @@ export const Rules: React.FC = () => {
                   Item Pelanggaran (Penambahan Poin)
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {POINT_ITEMS.filter(item => item.type === 'Violation').map((item, idx) => (
+                  {apiPointItems.filter(item => item.type === 'Violation').map((item, idx) => (
                     <div key={idx} className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/30 flex justify-between items-start gap-4">
                       <div>
                         <p className="font-medium text-neutral-900 dark:text-white text-sm mb-1">{item.name}</p>
@@ -90,7 +96,7 @@ export const Rules: React.FC = () => {
                   Item Taubat (Pengurangan Poin)
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {POINT_ITEMS.filter(item => item.type === 'Taubat').map((item, idx) => (
+                  {apiPointItems.filter(item => item.type === 'Taubat').map((item, idx) => (
                     <div key={idx} className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/30 flex justify-between items-start gap-4">
                       <div>
                         <p className="font-medium text-neutral-900 dark:text-white text-sm mb-1">{item.name}</p>
@@ -118,7 +124,7 @@ export const Rules: React.FC = () => {
               </h2>
             </div>
             <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-              {MOCK_PELANGGARAN.map((rule, idx) => (
+              {rawRules.map((rule, idx) => (
                 <div key={idx} className="p-6 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30 transition-colors">
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1 space-y-3">
