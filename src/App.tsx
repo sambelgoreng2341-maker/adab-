@@ -30,6 +30,27 @@ export default function App() {
   const [apiRawRules, setApiRawRules] = useState<any[]>([]);
   const [isLoadingApi, setIsLoadingApi] = useState(true);
   const [apiWarning, setApiWarning] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const saveRecordsToApi = async (newRecords: PointRecord[]) => {
+    setIsSaving(true);
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify({
+          action: 'saveRecords',
+          records: newRecords
+        })
+      });
+    } catch (e) {
+      console.error('Failed to save to API', e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Initialize Dark Mode
   useEffect(() => {
@@ -174,16 +195,24 @@ export default function App() {
   }, [records]);
 
   const handleAddRecord = (record: Omit<PointRecord, 'id' | 'timestamp'>) => {
-    setRecords(prev => [{
-      ...record,
-      id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9),
-      timestamp: new Date().toISOString(),
-    }, ...prev]);
+    setRecords(prev => {
+      const newRecords = [{
+        ...record,
+        id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9),
+        timestamp: new Date().toISOString(),
+      }, ...prev];
+      saveRecordsToApi(newRecords);
+      return newRecords;
+    });
   };
 
   const handleDeleteRecord = (id: string) => {
     if(window.confirm('Yakin ingin menghapus catatan ini?')) {
-      setRecords(prev => prev.filter((r) => r.id !== id));
+      setRecords(prev => {
+        const newRecords = prev.filter((r) => r.id !== id);
+        saveRecordsToApi(newRecords);
+        return newRecords;
+      });
     }
   };
 
@@ -202,7 +231,9 @@ export default function App() {
         relatedViolationId: violation.id,
       };
 
-      return prev.map(r => r.id === violationId ? { ...r, status: 'Completed' as const } : r).concat(taubatRecord);
+      const newRecords = prev.map(r => r.id === violationId ? { ...r, status: 'Completed' as const } : r).concat(taubatRecord);
+      saveRecordsToApi(newRecords);
+      return newRecords;
     });
   };
 
