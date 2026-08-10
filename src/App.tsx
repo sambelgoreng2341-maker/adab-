@@ -53,11 +53,11 @@ export default function App() {
         const response = await fetch(`${API_URL}?action=getData`);
         const result = await response.json();
         
-        const santriRes = result.status === 'success' && result.data.students && result.data.students.length > 0 
+        const santriRes = result.status === 'success' && result.data.students
           ? result.data.students 
           : MOCK_SANTRI;
           
-        const pelanggaranRes = result.status === 'success' && result.data.rules && result.data.rules.length > 0
+        const pelanggaranRes = result.status === 'success' && result.data.rules
           ? result.data.rules
           : MOCK_PELANGGARAN;
 
