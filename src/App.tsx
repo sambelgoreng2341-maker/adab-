@@ -14,7 +14,7 @@ import { HistoryList } from './components/HistoryList';
 import { Rules } from './components/Rules';
 import { PointRecord, StudentSummary, ApiStudent, PointItem } from './types';
 import { MOCK_SANTRI, MOCK_PELANGGARAN } from './data';
-import { Menu, BookOpen } from 'lucide-react';
+import { Menu, BookOpen, AlertTriangle } from 'lucide-react';
 
 const API_URL = 'https://script.google.com/macros/s/AKfycby0kWcycE3LXmehymFdlpQ0X0aS_A-L1sl6WxuGKHZGsI35ODpFqKNYUiyyXuNTzFyD/exec';
 
@@ -29,6 +29,7 @@ export default function App() {
   const [apiPointItems, setApiPointItems] = useState<PointItem[]>([]);
   const [apiRawRules, setApiRawRules] = useState<any[]>([]);
   const [isLoadingApi, setIsLoadingApi] = useState(true);
+  const [apiWarning, setApiWarning] = useState<string | null>(null);
 
   // Initialize Dark Mode
   useEffect(() => {
@@ -50,16 +51,27 @@ export default function App() {
     const fetchData = async () => {
       setIsLoadingApi(true);
       try {
-        const response = await fetch(`${API_URL}?action=getData`);
+        const response = await fetch(`${API_URL}?action=getData`, {
+          method: 'GET',
+          redirect: 'follow'
+        });
         const result = await response.json();
         
-        const santriRes = result.status === 'success' && result.data.students
+        let santriRes = result.status === 'success' && result.data.students
           ? result.data.students 
           : MOCK_SANTRI;
           
-        const pelanggaranRes = result.status === 'success' && result.data.rules
+        let pelanggaranRes = result.status === 'success' && result.data.rules
           ? result.data.rules
           : MOCK_PELANGGARAN;
+
+        if (result.status === 'success') {
+          if (result.data.students.length === 0 && result.data.rules.length === 0) {
+            setApiWarning('Berhasil terhubung ke API, namun data dari Google Sheet kosong. Pastikan sheet tidak kosong dan Anda telah melakukan Deploy versi baru pada Google Apps Script.');
+          } else {
+            setApiWarning(null);
+          }
+        }
 
         const recordsRes = result.status === 'success' && result.data.records && result.data.records.length > 0
           ? result.data.records
@@ -297,6 +309,16 @@ export default function App() {
 
         <div className="p-4 sm:p-6 lg:p-8 flex-1 overflow-x-hidden">
           <div className="max-w-6xl mx-auto">
+          {apiWarning && (
+            <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl text-orange-800 dark:bg-orange-900/20 dark:border-orange-800/50 dark:text-orange-300">
+              <h3 className="font-bold flex items-center gap-2 mb-1">
+                <AlertTriangle className="w-5 h-5" />
+                Data API Kosong
+              </h3>
+              <p className="text-sm">{apiWarning}</p>
+            </div>
+          )}
+          
           {activeTab === 'dashboard' && (
             <Dashboard records={records} students={studentsSummary} setActiveTab={setActiveTab} />
           )}
