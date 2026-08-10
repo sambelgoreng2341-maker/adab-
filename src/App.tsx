@@ -187,7 +187,7 @@ export default function App() {
         relatedViolationId: violation.id,
       };
 
-      return prev.map(r => r.id === violationId ? { ...r, status: 'Completed' } : r).concat(taubatRecord);
+      return prev.map(r => r.id === violationId ? { ...r, status: 'Completed' as const } : r).concat(taubatRecord);
     });
   };
 
