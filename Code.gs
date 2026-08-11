@@ -1,4 +1,4 @@
-function setup() {
+function setupSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   
   // Setup Data Santri Sheet
@@ -7,7 +7,17 @@ function setup() {
     santriSheet = ss.insertSheet("Data Santri");
     santriSheet.appendRow(["nisn", "nama", "kelas", "kamar"]);
     santriSheet.getRange("A1:D1").setFontWeight("bold");
-    santriSheet.appendRow(["1234567890", "Ahmad Fulan", "10A", "Kamar 1"]);
+    const santriData = [
+      [2023005, "Muhammad Ghaisan As Sakhiy", "Kelas 10", "Lantai 2"],
+      [2023006, "Muhammad Syaifulloh", "Kelas 10", "Lantai 2"],
+      [2024001, "Abdul Azis Marwan Baraba", "Kelas 9", "Lantai 2"],
+      [2024002, "Adiwangsa Widyatna", "Kelas 9", "Lantai 1"],
+      [2024003, "Affan Al Faris", "Kelas 9", "Lantai 2"],
+      [2024004, "Akmal Javas Naraya", "Kelas 9", "Lantai 1"],
+      [2024005, "Arya Hanif Haithami", "Kelas 9", "Lantai 2"],
+      [2024006, "Fahri Naufal Altof", "Kelas 9", "Lantai 1"]
+    ];
+    santriSheet.getRange(2, 1, santriData.length, 4).setValues(santriData);
   }
   
   // Setup Data Pelanggaran Sheet
@@ -16,7 +26,14 @@ function setup() {
     pelanggaranSheet = ss.insertSheet("Data Pelanggaran");
     pelanggaranSheet.appendRow(["Kategori (BAB)", "Larangan / Pelanggaran", "Klasifikasi", "Poin Pelanggaran", "Bentuk Taubat (Hukuman Mendidik)", "Pengurangan Poin Taubat"]);
     pelanggaranSheet.getRange("A1:F1").setFontWeight("bold");
-    pelanggaranSheet.appendRow(["I. Aqidah", "Dilarang menganut aqidah bathilah", "C", "60", "Setor hafalan", "-25"]);
+    const pelanggaranData = [
+      ["I. Aqidah", "Dilarang menganut aqidah bathilah yang bertentangan dengan Al Quran dan As Sunnah", "C", 60, "Setor hafalan Aqidah Sanusiyyah/Matan Tauhid + Ikrar Syahadat & Taubat + Konseling Mudir", -25],
+      ["I. Aqidah", "Dilarang menyebarkan aqidah bathilah baik dengan lisan, tulisan maupun cara lainnya", "C", 60, "Membuat rangkuman kitab Aqidah Shahihah (minimal 5 lembar) + Konseling Mudir + Pemanggilan Orangtua", -25],
+      ["I. Aqidah", "Dilarang mengabaikan peningkatan pemahaman Aqidah Shahihah dan dakwahnya", "B", 15, "Menyimak kajian Aqidah & membuat resume 2 halaman + Menghafal 5 hadits tauhid", -7],
+      ["II. Ibadah", "Dilarang meninggalkan shalat wajib lima waktu berjamaah di masjid tepat pada waktunya", "B", 20, "Shalat sunnah Taubat 2 rakaat + Piket tempat wudhu/masjid 3 hari + Khidmah azan subuh 3 hari", -9],
+      ["II. Ibadah", "Dilarang terlambat berwudlu dan tidak berada di masjid sebelum adzan", "A", 5, "Datang ke masjid 15 menit sebelum azan selama 3 hari berturut-turut + Piket kerapian sandal masjid", -2]
+    ];
+    pelanggaranSheet.getRange(2, 1, pelanggaranData.length, 6).setValues(pelanggaranData);
   }
 
   // Setup Records (Riwayat) Sheet
@@ -29,7 +46,10 @@ function setup() {
 }
 
 function doGet(e) {
-  const action = e.parameter.action;
+  var action = "getData";
+  if (e && e.parameter && e.parameter.action) {
+    action = e.parameter.action;
+  }
   
   if (action === 'getData') {
     return ContentService.createTextOutput(JSON.stringify({
@@ -91,6 +111,8 @@ function getSheetData(sheetName) {
   if (!sheet) return [];
   
   const data = sheet.getDataRange().getValues();
+  if (data.length < 1) return [];
+  
   const headers = data[0];
   const rows = [];
   
@@ -117,6 +139,8 @@ function getRecordsData() {
   if (!sheet) return [];
   
   const data = sheet.getDataRange().getValues();
+  if (data.length < 1) return [];
+  
   const headers = data[0];
   const rows = [];
   
@@ -147,13 +171,14 @@ function getRecordsData() {
 function saveRecordsData(records) {
   let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Riwayat");
   if (!sheet) {
-    setup(); // Create sheet if not exists
+    setupSheet(); // Create sheet if not exists
     sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Riwayat");
   }
   
   // Clear existing data except headers
-  if (sheet.getLastRow() > 1) {
-    sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).clearContent();
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
   }
   
   if (!records || records.length === 0) return;

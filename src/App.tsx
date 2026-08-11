@@ -217,6 +217,13 @@ export default function App() {
     }
   };
 
+  const handleClearAllRecords = () => {
+    if(window.confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA riwayat catatan? Tindakan ini tidak dapat dibatalkan.')) {
+      setRecords([]);
+      saveRecordsToApi([]);
+    }
+  };
+
   const handleCompleteTaubat = (violationId: string) => {
     setRecords(prev => {
       const violation = prev.find(r => r.id === violationId);
@@ -367,7 +374,7 @@ export default function App() {
             <RecordForm onAddRecord={handleAddRecord} apiPointItems={apiPointItems} apiStudents={apiStudents} />
           )}
           {activeTab === 'history' && (
-            <HistoryList records={records} onDeleteRecord={handleDeleteRecord} onCompleteTaubat={handleCompleteTaubat} />
+            <HistoryList records={records} onDeleteRecord={handleDeleteRecord} onCompleteTaubat={handleCompleteTaubat} onClearAll={handleClearAllRecords} />
           )}
           {activeTab === 'rules' && (
             <Rules apiPointItems={apiPointItems} rawRules={apiRawRules} />

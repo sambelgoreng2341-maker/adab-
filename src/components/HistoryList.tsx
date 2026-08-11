@@ -10,9 +10,10 @@ type HistoryListProps = {
   records: PointRecord[];
   onDeleteRecord: (id: string) => void;
   onCompleteTaubat: (id: string) => void;
+  onClearAll: () => void;
 };
 
-export const HistoryList: React.FC<HistoryListProps> = ({ records, onDeleteRecord, onCompleteTaubat }) => {
+export const HistoryList: React.FC<HistoryListProps> = ({ records, onDeleteRecord, onCompleteTaubat, onClearAll }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'All' | 'Violation' | 'Taubat'>('All');
   const [filterDormitory, setFilterDormitory] = useState('All');
@@ -173,7 +174,14 @@ export const HistoryList: React.FC<HistoryListProps> = ({ records, onDeleteRecor
             <option value="Taubat">Daftar Tugas Taubat (Checklist)</option>
           </select>
 
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button
+              onClick={onClearAll}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-xl text-sm font-medium transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Hapus Semua
+            </button>
             <button
               onClick={exportToPDF}
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-900 dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-100 text-white dark:text-neutral-900 rounded-xl text-sm font-medium transition-colors"
