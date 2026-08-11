@@ -43,7 +43,8 @@ export default function App() {
         body: JSON.stringify({
           action: 'saveRecords',
           records: newRecords
-        })
+        }),
+        redirect: 'follow'
       });
     } catch (e) {
       console.error('Failed to save to API', e);
