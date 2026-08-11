@@ -14,6 +14,7 @@ export const RecordForm: React.FC<RecordFormProps> = ({ onAddRecord, apiPointIte
   const [studentNames, setStudentNames] = useState<string[]>([]);
   const [currentStudentInput, setCurrentStudentInput] = useState('');
   const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
+  const [filterKamar, setFilterKamar] = useState('All');
   const [recordType, setRecordType] = useState<'Violation' | 'Taubat'>('Violation');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedItemId, setSelectedItemId] = useState('');
@@ -48,10 +49,19 @@ export const RecordForm: React.FC<RecordFormProps> = ({ onAddRecord, apiPointIte
     }
   }, [selectedItemId, selectedItem]);
 
+  const uniqueKamar = React.useMemo(() => {
+    const set = new Set<string>();
+    apiStudents.forEach(s => s.kamar && set.add(s.kamar));
+    return Array.from(set).sort();
+  }, [apiStudents]);
+
   const filteredStudents = React.useMemo(() => {
-    if (!currentStudentInput) return apiStudents;
-    return apiStudents.filter(s => s.nama.toLowerCase().includes(currentStudentInput.toLowerCase()));
-  }, [apiStudents, currentStudentInput]);
+    return apiStudents.filter(s => {
+      const matchesName = s.nama.toLowerCase().includes(currentStudentInput.toLowerCase());
+      const matchesKamar = filterKamar === 'All' || s.kamar === filterKamar;
+      return matchesName && matchesKamar;
+    });
+  }, [apiStudents, currentStudentInput, filterKamar]);
 
   const toggleStudent = (name: string) => {
     if (studentNames.includes(name)) {
@@ -178,8 +188,8 @@ export const RecordForm: React.FC<RecordFormProps> = ({ onAddRecord, apiPointIte
                 </AnimatePresence>
               </div>
 
-              <div className="relative z-20">
-                <div className="relative group">
+              <div className="relative z-20 flex flex-col sm:flex-row gap-3">
+                <div className="relative group flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <Users className="h-4 w-4 text-neutral-400 dark:text-neutral-500 group-focus-within:text-teal-500 dark:group-focus-within:text-teal-400 transition-colors" />
                   </div>
@@ -195,8 +205,20 @@ export const RecordForm: React.FC<RecordFormProps> = ({ onAddRecord, apiPointIte
                     className="block w-full pl-10 pr-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-500/10 focus:border-teal-500 text-sm bg-neutral-50/50 dark:bg-neutral-800/50 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors outline-none text-neutral-900 dark:text-white"
                     placeholder="Cari dan pilih santri (bisa pilih lebih dari satu)..."
                   />
-                  
-                  {isStudentDropdownOpen && (
+                </div>
+                <div className="relative sm:w-48">
+                  <select
+                    value={filterKamar}
+                    onChange={(e) => { setFilterKamar(e.target.value); setIsStudentDropdownOpen(true); }}
+                    className="block w-full px-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-500/10 focus:border-teal-500 text-sm bg-neutral-50/50 dark:bg-neutral-800/50 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors outline-none text-neutral-900 dark:text-white cursor-pointer"
+                  >
+                    <option value="All">Semua Asrama</option>
+                    {uniqueKamar.map(k => <option key={k} value={k}>{k}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="relative z-20">
+                {isStudentDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setIsStudentDropdownOpen(false)}></div>
                       <div className="absolute z-20 w-full mt-2 bg-white dark:bg-neutral-900 rounded-xl shadow-[0_4px_30px_rgb(0,0,0,0.1)] border border-neutral-100 dark:border-neutral-800 overflow-hidden max-h-64 overflow-y-auto">
@@ -226,7 +248,6 @@ export const RecordForm: React.FC<RecordFormProps> = ({ onAddRecord, apiPointIte
                   )}
                 </div>
               </div>
-            </div>
 
             {categories.length > 1 && (
               <div className="space-y-2 md:col-span-2">

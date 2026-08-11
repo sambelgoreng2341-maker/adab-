@@ -15,9 +15,18 @@ type HistoryListProps = {
 
 export const HistoryList: React.FC<HistoryListProps> = ({ records, onDeleteRecord, onCompleteTaubat, onClearAll }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
   const [filterType, setFilterType] = useState<'All' | 'Violation' | 'Taubat'>('All');
   const [filterDormitory, setFilterDormitory] = useState('All');
   const [datePreset, setDatePreset] = useState('All');
+
+  const uniqueStudentNames = React.useMemo(() => {
+    const set = new Set<string>();
+    records.forEach(r => set.add(r.studentName));
+    return Array.from(set).sort();
+  }, [records]);
+
+  const filteredSearchNames = uniqueStudentNames.filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const uniqueDormitories = React.useMemo(() => {
     const set = new Set<string>();
@@ -137,9 +146,38 @@ export const HistoryList: React.FC<HistoryListProps> = ({ records, onDeleteRecor
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setIsStudentDropdownOpen(true)}
               className="block w-full pl-9 pr-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-500/10 focus:border-teal-500 text-sm bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none"
               placeholder="Cari santri, asrama, kegiatan..."
             />
+            {isStudentDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsStudentDropdownOpen(false)}></div>
+                <div className="absolute z-20 w-full mt-2 bg-white dark:bg-neutral-900 rounded-xl shadow-[0_4px_30px_rgb(0,0,0,0.1)] border border-neutral-100 dark:border-neutral-800 overflow-hidden max-h-64 overflow-y-auto">
+                  {filteredSearchNames.length > 0 ? (
+                    <>
+                      <div
+                        className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 border-b border-neutral-50 dark:border-neutral-800 cursor-pointer text-sm text-neutral-900 dark:text-neutral-200 font-medium"
+                        onClick={() => { setSearchTerm(''); setIsStudentDropdownOpen(false); }}
+                      >
+                        Semua Hasil
+                      </div>
+                      {filteredSearchNames.map((name, idx) => (
+                        <div
+                          key={idx}
+                          className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 border-b border-neutral-50 dark:border-neutral-800 last:border-0 cursor-pointer text-sm text-neutral-900 dark:text-neutral-200"
+                          onClick={() => { setSearchTerm(name); setIsStudentDropdownOpen(false); }}
+                        >
+                          {name}
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-neutral-500 dark:text-neutral-400 text-center">Tidak ada santri ditemukan</div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
           
           <select

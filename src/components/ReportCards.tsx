@@ -13,6 +13,7 @@ type ReportCardsProps = {
 
 export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, apiStudents }) => {
   const [filterName, setFilterName] = useState('');
+  const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
   const [filterKamar, setFilterKamar] = useState('All');
   const [filterKelas, setFilterKelas] = useState('All');
   const [datePreset, setDatePreset] = useState('All');
@@ -20,6 +21,12 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
   const [draftNotes, setDraftNotes] = useState<Record<string, string>>({});
   const [savedIndicator, setSavedIndicator] = useState<Record<string, boolean>>({});
   const [expandedPreview, setExpandedPreview] = useState<string | null>(null);
+
+  const uniqueStudentNames = useMemo(() => {
+    return Array.from(new Set(apiStudents.map(s => s.nama))).filter(Boolean).sort();
+  }, [apiStudents]);
+
+  const filteredSearchNames = uniqueStudentNames.filter(name => name.toLowerCase().includes(filterName.toLowerCase()));
 
   const uniqueKamar = useMemo(() => {
     return Array.from(new Set(apiStudents.map(s => s.kamar))).filter(Boolean).sort();
@@ -409,15 +416,44 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
 
       <div className="bg-white dark:bg-neutral-900 p-6 rounded-2xl shadow-sm border border-neutral-200 dark:border-neutral-800 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Cari Nama</label>
             <input
               type="text"
-              placeholder="Cari nama santri..."
               value={filterName}
               onChange={(e) => setFilterName(e.target.value)}
+              onFocus={() => setIsStudentDropdownOpen(true)}
+              placeholder="Ketik untuk mencari..."
               className="w-full px-4 py-3 bg-neutral-50/50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-500/10 outline-none text-neutral-900 dark:text-white"
             />
+            {isStudentDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsStudentDropdownOpen(false)}></div>
+                <div className="absolute z-20 w-full mt-1 bg-white dark:bg-neutral-900 rounded-xl shadow-[0_4px_30px_rgb(0,0,0,0.1)] border border-neutral-100 dark:border-neutral-800 overflow-hidden max-h-64 overflow-y-auto">
+                  {filteredSearchNames.length > 0 ? (
+                    <>
+                      <div
+                        className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 border-b border-neutral-50 dark:border-neutral-800 cursor-pointer text-sm text-neutral-900 dark:text-neutral-200 font-medium"
+                        onClick={() => { setFilterName(''); setIsStudentDropdownOpen(false); }}
+                      >
+                        Semua Hasil
+                      </div>
+                      {filteredSearchNames.map((name, idx) => (
+                        <div
+                          key={idx}
+                          className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 border-b border-neutral-50 dark:border-neutral-800 last:border-0 cursor-pointer text-sm text-neutral-900 dark:text-neutral-200"
+                          onClick={() => { setFilterName(name); setIsStudentDropdownOpen(false); }}
+                        >
+                          {name}
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-neutral-500 dark:text-neutral-400 text-center">Tidak ada santri ditemukan</div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="space-y-2">
