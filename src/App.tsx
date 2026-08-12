@@ -16,7 +16,8 @@ import { PointRecord, StudentSummary, ApiStudent, PointItem } from './types';
 import { MOCK_SANTRI, MOCK_PELANGGARAN } from './data';
 import { Menu, BookOpen, AlertTriangle } from 'lucide-react';
 
-const API_URL = 'https://script.google.com/macros/s/AKfycby0kWcycE3LXmehymFdlpQ0X0aS_A-L1sl6WxuGKHZGsI35ODpFqKNYUiyyXuNTzFyD/exec'
+const API_URL = 'https://script.google.com/macros/s/AKfycby0kWcycE3LXmehymFdlpQ0X0aS_A-L1sl6WxuGKHZGsI35ODpFqKNYUiyyXuNTzFyD/exec';
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [records, setRecords] = useState<PointRecord[]>([]);
