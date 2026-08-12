@@ -91,7 +91,7 @@ export const StudentReport: React.FC<StudentReportProps> = ({ records, students,
     
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text('Pondok Pesantren', 105, 27, { align: 'center' });
+    doc.text("Iska Qur'anic Boarding School", 105, 27, { align: 'center' });
 
     // Line separator
     doc.setLineWidth(0.5);

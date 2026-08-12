@@ -22,6 +22,34 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
   const [savedIndicator, setSavedIndicator] = useState<Record<string, boolean>>({});
   const [expandedPreview, setExpandedPreview] = useState<string | null>(null);
 
+  const [pengurusList, setPengurusList] = useState<string[]>(() => {
+    const saved = localStorage.getItem('pengurus_kesantrian_list');
+    return saved ? JSON.parse(saved) : ['Dr. Ustadz Wahyudi Umar Abdurrahman, S.Pd.I., M.Pd., Al-Hafidz'];
+  });
+  const [selectedPengurus, setSelectedPengurus] = useState<string>(pengurusList[0] || '');
+  const [signaturePosition, setSignaturePosition] = useState<'mudir-left' | 'mudir-right'>('mudir-left');
+  const [newPengurusInput, setNewPengurusInput] = useState('');
+  const [isManagingPengurus, setIsManagingPengurus] = useState(false);
+
+  const handleAddPengurus = () => {
+    if (newPengurusInput.trim() && !pengurusList.includes(newPengurusInput.trim())) {
+      const newList = [...pengurusList, newPengurusInput.trim()];
+      setPengurusList(newList);
+      setSelectedPengurus(newPengurusInput.trim());
+      localStorage.setItem('pengurus_kesantrian_list', JSON.stringify(newList));
+      setNewPengurusInput('');
+    }
+  };
+
+  const handleRemovePengurus = (name: string) => {
+    const newList = pengurusList.filter(p => p !== name);
+    setPengurusList(newList);
+    if (selectedPengurus === name) {
+      setSelectedPengurus(newList[0] || '');
+    }
+    localStorage.setItem('pengurus_kesantrian_list', JSON.stringify(newList));
+  };
+
   const uniqueStudentNames = useMemo(() => {
     return Array.from(new Set(apiStudents.map(s => s.nama))).filter(Boolean).sort();
   }, [apiStudents]);
@@ -111,7 +139,7 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
       
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
-      doc.text('Pondok Pesantren', 105, 27, { align: 'center' });
+      doc.text("Iska Qur'anic Boarding School", 105, 27, { align: 'center' });
 
       // Line separator
       doc.setLineWidth(0.5);
@@ -223,12 +251,25 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
       
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text('Mengetahui,', 14, sigY);
-      doc.text('Wali Santri / Orang Tua', 14, sigY + 5);
-      doc.text('Pengurus Kesantrian', 140, sigY + 5);
+      if (signaturePosition === 'mudir-left') {
+      doc.text('Mengetahui, Mudir IQBS', 45, sigY, { align: 'center' });
+      doc.text('Pengurus Kesantrian', 160, sigY, { align: 'center' });
       
-      doc.line(14, sigY + 25, 55, sigY + 25);
-      doc.line(140, sigY + 25, 186, sigY + 25);
+      doc.setFont('helvetica', 'normal');
+      doc.text('( ______________________ )', 45, sigY + 25, { align: 'center' });
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text(selectedPengurus, 160, sigY + 25, { align: 'center' });
+    } else {
+      doc.text('Pengurus Kesantrian', 45, sigY, { align: 'center' });
+      doc.text('Mengetahui, Mudir IQBS', 160, sigY, { align: 'center' });
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text(selectedPengurus, 45, sigY + 25, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text('( ______________________ )', 160, sigY + 25, { align: 'center' });
+    }
     });
 
     doc.save(`Rapot_Kedisiplinan_${filterKelas === 'All' ? 'SemuaKelas' : filterKelas}_${filterKamar === 'All' ? 'SemuaAsrama' : filterKamar}.pdf`);
@@ -244,7 +285,7 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
     
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text('Pondok Pesantren', 105, 27, { align: 'center' });
+    doc.text("Iska Qur'anic Boarding School", 105, 27, { align: 'center' });
 
     // Line separator
     doc.setLineWidth(0.5);
@@ -356,12 +397,25 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text('Mengetahui,', 14, sigY);
-    doc.text('Wali Santri / Orang Tua', 14, sigY + 5);
-    doc.text('Pengurus Kesantrian', 140, sigY + 5);
-    
-    doc.line(14, sigY + 25, 55, sigY + 25);
-    doc.line(140, sigY + 25, 186, sigY + 25);
+    if (signaturePosition === 'mudir-left') {
+      doc.text('Mengetahui, Mudir IQBS', 45, sigY, { align: 'center' });
+      doc.text('Pengurus Kesantrian', 160, sigY, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text('( ______________________ )', 45, sigY + 25, { align: 'center' });
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text(selectedPengurus, 160, sigY + 25, { align: 'center' });
+    } else {
+      doc.text('Pengurus Kesantrian', 45, sigY, { align: 'center' });
+      doc.text('Mengetahui, Mudir IQBS', 160, sigY, { align: 'center' });
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text(selectedPengurus, 45, sigY + 25, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text('( ______________________ )', 160, sigY + 25, { align: 'center' });
+    }
     
     doc.save(`Rapot_Kedisiplinan_${report.nama.replace(/\s+/g, '_')}.pdf`);
   };
@@ -497,6 +551,84 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
           </div>
         </div>
 
+        <div className="pt-6 border-t border-neutral-100 dark:border-neutral-800">
+          <div className="flex flex-col md:flex-row md:items-end gap-4">
+            <div className="flex-1 space-y-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Pengurus Kesantrian (Tanda Tangan)</label>
+              <select
+                value={selectedPengurus}
+                onChange={(e) => setSelectedPengurus(e.target.value)}
+                className="w-full px-4 py-3 bg-neutral-50/50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-500/10 outline-none text-neutral-900 dark:text-white cursor-pointer"
+              >
+                {pengurusList.map(p => <option key={p} value={p} className="bg-white dark:bg-neutral-900">{p}</option>)}
+              </select>
+            </div>
+            <div className="flex-1 space-y-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Posisi Tanda Tangan</label>
+              <select
+                value={signaturePosition}
+                onChange={(e) => setSignaturePosition(e.target.value as 'mudir-left' | 'mudir-right')}
+                className="w-full px-4 py-3 bg-neutral-50/50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-500/10 outline-none text-neutral-900 dark:text-white cursor-pointer"
+              >
+                <option value="mudir-left" className="bg-white dark:bg-neutral-900">Kiri: Mudir, Kanan: Kesantrian</option>
+                <option value="mudir-right" className="bg-white dark:bg-neutral-900">Kiri: Kesantrian, Kanan: Mudir</option>
+              </select>
+            </div>
+            <button
+              onClick={() => setIsManagingPengurus(!isManagingPengurus)}
+              className="px-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors whitespace-nowrap"
+            >
+              Atur Pengurus
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {isManagingPengurus && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden mt-4"
+              >
+                <div className="p-4 bg-neutral-50/50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 space-y-4">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newPengurusInput}
+                      onChange={(e) => setNewPengurusInput(e.target.value)}
+                      placeholder="Nama & Gelar Pengurus Baru..."
+                      className="flex-1 px-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-500/10 outline-none text-neutral-900 dark:text-white"
+                    />
+                    <button
+                      onClick={handleAddPengurus}
+                      className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      Tambah
+                    </button>
+                  </div>
+                  {pengurusList.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Daftar Pengurus Kesantrian:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {pengurusList.map(p => (
+                          <div key={p} className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-700 dark:text-neutral-300">
+                            <span>{p}</span>
+                            {pengurusList.length > 1 && (
+                              <button onClick={() => handleRemovePengurus(p)} className="text-red-500 hover:text-red-600 p-0.5 ml-1">
+                                &times;
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">
             <span className="text-teal-600 dark:text-teal-400 font-bold">{studentReports.length}</span> Santri ditemukan
@@ -591,7 +723,7 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
                         <div className="border border-neutral-200 dark:border-neutral-700 rounded-xl p-8 bg-white dark:bg-neutral-900 shadow-sm max-w-4xl mx-auto font-sans">
                            <div className="text-center mb-8 border-b border-neutral-200 dark:border-neutral-700 pb-6">
                               <h2 className="text-2xl font-bold uppercase tracking-wider mb-2 dark:text-white">Rapor Kedisiplinan Santri</h2>
-                              <p className="text-neutral-600 dark:text-neutral-400 font-medium">Pondok Pesantren</p>
+                              <p className="text-neutral-600 dark:text-neutral-400 font-medium">Iska Qur'anic Boarding School</p>
                            </div>
                            
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mb-8 text-sm">
@@ -672,14 +804,29 @@ export const ReportCards: React.FC<ReportCardsProps> = ({ records, students, api
                            
                            {/* Signatures */}
                            <div className="flex justify-between text-sm pt-8 px-8 border-t border-neutral-200 dark:border-neutral-700">
-                              <div className="text-center">
-                                 <p className="mb-20 text-neutral-600 dark:text-neutral-400">Mengetahui,</p>
-                                 <p className="font-medium text-neutral-900 dark:text-white">Wali Santri / Orang Tua</p>
-                              </div>
-                              <div className="text-center">
-                                 <p className="mb-20 text-neutral-600 dark:text-neutral-400">Pengurus Kesantrian</p>
-                                 <p className="font-medium text-neutral-900 dark:text-white">_______________________</p>
-                              </div>
+                              {signaturePosition === 'mudir-left' ? (
+                                <>
+                                  <div className="text-center flex-1 max-w-[280px] mx-auto">
+                                     <p className="mb-20 text-neutral-600 dark:text-neutral-400">Mengetahui, Mudir IQBS</p>
+                                     <p className="font-medium text-neutral-900 dark:text-white">( _______________________ )</p>
+                                  </div>
+                                  <div className="text-center flex-1 max-w-[280px] mx-auto">
+                                     <p className="mb-20 text-neutral-600 dark:text-neutral-400">Pengurus Kesantrian</p>
+                                     <p className="font-bold text-neutral-900 dark:text-white">{selectedPengurus}</p>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="text-center flex-1 max-w-[280px] mx-auto">
+                                     <p className="mb-20 text-neutral-600 dark:text-neutral-400">Pengurus Kesantrian</p>
+                                     <p className="font-bold text-neutral-900 dark:text-white">{selectedPengurus}</p>
+                                  </div>
+                                  <div className="text-center flex-1 max-w-[280px] mx-auto">
+                                     <p className="mb-20 text-neutral-600 dark:text-neutral-400">Mengetahui, Mudir IQBS</p>
+                                     <p className="font-medium text-neutral-900 dark:text-white">( _______________________ )</p>
+                                  </div>
+                                </>
+                              )}
                            </div>
                         </div>
                       </div>

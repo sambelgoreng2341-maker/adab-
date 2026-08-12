@@ -35,8 +35,9 @@ export default function App() {
   const saveRecordsToApi = async (newRecords: PointRecord[]) => {
     setIsSaving(true);
     try {
-      await fetch(API_URL, {
+      await fetch('/api/gas/saveRecords', {
         method: 'POST',
+        credentials: 'omit',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
         },
@@ -73,11 +74,15 @@ export default function App() {
     const fetchData = async () => {
       setIsLoadingApi(true);
       try {
-        const response = await fetch(`${API_URL}?action=getData`, {
-          method: 'GET',
-          redirect: 'follow'
-        });
-        const result = await response.json();
+        const response = await fetch('/api/gas/getData');
+        const text = await response.text();
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (e) {
+          console.error("Failed to parse API response. Response was:", text.substring(0, 200));
+          throw new Error("API returned invalid data (possibly HTML error page).");
+        }
         
         let santriRes = result.status === 'success' && result.data.students
           ? result.data.students 
