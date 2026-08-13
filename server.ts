@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 
-const API_URL = 'https://script.google.com/macros/s/AKfycby0kWcycE3LXmehymFdlpQ0X0aS_A-L1sl6WxuGKHZGsI35ODpFqKNYUiyyXuNTzFyD/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxEtikMYTlaspbLWX9SELZS0_8zluoCgn_ZOryhb3-T9scKonQimuoZnVhebgdYeD3t/exec';
 
 async function startServer() {
   const app = express();
@@ -15,6 +15,9 @@ async function startServer() {
   // API proxy routes
   app.get("/api/gas/getData", async (req, res) => {
     try {
+      if (!API_URL) {
+        return res.json({ status: 'error', message: 'API Disconnected' });
+      }
       const response = await fetch(`${API_URL}?action=getData&_t=${Date.now()}`, {
         method: 'GET',
         headers: {
@@ -33,12 +36,16 @@ async function startServer() {
 
   app.post("/api/gas/saveRecords", async (req, res) => {
     try {
+      if (!API_URL) {
+        return res.json({ status: 'error', message: 'API Disconnected' });
+      }
       let bodyStr = req.body;
       if (typeof bodyStr === 'object') {
          bodyStr = JSON.stringify(bodyStr);
       }
       const response = await fetch(API_URL, {
         method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
         body: bodyStr,
         redirect: 'follow'
       });

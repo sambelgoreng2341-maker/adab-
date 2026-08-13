@@ -1,22 +1,12 @@
 const fs = require('fs');
-const file = 'src/App.tsx';
-let code = fs.readFileSync(file, 'utf8');
-
+let code = fs.readFileSync('server.ts', 'utf8');
 code = code.replace(
-  /const response = await fetch\(`\$\{API_URL\}\?action=getData`, \{/g,
-  `const response = await fetch(\`\${API_URL}?action=getData&_t=\${Date.now()}\`, {`
+  /const response = await fetch\(API_URL, \{[\s\S]*?redirect: 'follow'\s*\}\);/,
+  `const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: bodyStr,
+        redirect: 'follow'
+      });`
 );
-
-code = code.replace(
-  /const result = await response.json\(\);/g,
-  `const text = await response.text();
-        let result;
-        try {
-          result = JSON.parse(text);
-        } catch (e) {
-          console.error("Failed to parse API response. Response was:", text.substring(0, 200));
-          throw new Error("API returned invalid data (possibly HTML error page).");
-        }`
-);
-
-fs.writeFileSync(file, code);
+fs.writeFileSync('server.ts', code);
