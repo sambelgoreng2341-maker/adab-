@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbxEtikMYTlaspbLWX9SELZS0_8zluoCgn_ZOryhb3-T9scKonQimuoZnVhebgdYeD3t/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxfuFoeSNaPZZMAH9bGuPf3bLLypGVs2D_g7-B_2Nrveq4TxhiG2XAHJopkuZZaPSM_/exec';
 
 async function startServer() {
   const app = express();
